@@ -111,3 +111,71 @@ public class Client {
             }
         }).start();
     }
+
+    private void listenForMessages() {
+        try {
+            while (!socket.isClosed()) {
+                String message = in.readUTF();
+                Platform.runLater(() -> appendMessage("Server: " + message));
+            }
+        } catch (IOException e) {
+            Platform.runLater(() -> appendMessage("Connection closed by server."));
+            closeConnection();
+        }
+    }
+
+    @FXML
+    private void onSend() {
+        String message = inputField.getText().trim();
+        if (message.isEmpty() || socket == null || socket.isClosed()) {
+            return;
+        }
+
+        try {
+            out.writeUTF(message);
+            appendMessage("You: " + message);
+            inputField.clear();
+        } catch (IOException e) {
+            appendMessage("Failed to send message: " + e.getMessage());
+        }
+    }
+
+    @FXML
+    private void onClose() {
+        closeConnection();
+        appendMessage("Connection closed.");
+    }
+
+    @FXML
+    private void onDisconnect() {
+        closeConnection();
+        appendMessage("Disconnected.");
+    }
+
+    private void closeConnection() {
+        try {
+            if (listenerThread != null && listenerThread.isAlive()) {
+                listenerThread.interrupt();
+            }
+            if (in != null) in.close();
+            if (out != null) out.close();
+            if (socket != null && !socket.isClosed()) socket.close();
+        } catch (IOException ignored) {
+        } finally {
+            Platform.runLater(() -> toggleControls(false));
+        }
+    }
+
+    private void toggleControls(boolean connected) {
+        hostField.setDisable(connected);
+        portField.setDisable(connected);
+        sendButton.setDisable(!connected);
+        inputField.setDisable(!connected);
+        closeButton.setDisable(!connected);
+        disconnectButton.setDisable(!connected);
+    }
+
+    private void appendMessage(String msg) {
+        messageArea.appendText(msg + "\n");
+    }
+}
