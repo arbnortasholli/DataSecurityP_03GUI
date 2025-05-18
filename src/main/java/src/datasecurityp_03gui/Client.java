@@ -1,4 +1,4 @@
-package src.ds_faza3_gui;
+package src.datasecurityp_03gui;
 
 import javafx.application.Platform;
 import javafx.fxml.FXML;

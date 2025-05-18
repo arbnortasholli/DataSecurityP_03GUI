@@ -97,10 +97,36 @@ public class Server {
     private void listenToClient() {}
 
     @FXML
-    private void onSend(ActionEvent event) {}
+    private void onSend(ActionEvent event) {
+        String msg = inputField.getText();
+        if (msg.isEmpty() || output == null) return;
+        try {
+            output.writeUTF(msg);
+            appendMessage("Server: " + msg);
+            inputField.clear();
+        } catch (IOException e) {
+            appendMessage("Failed to send message.");
+        }
+
+    }
 
     @FXML
-    private void onClose(ActionEvent event) {}
+    private void onClose(ActionEvent event) {
+        try {
+            if (output != null) output.writeUTF("Server is closing the connection.");
+            if (input != null) input.close();
+            if (output != null) output.close();
+            if (clientSocket != null) clientSocket.close();
+            if (serverSocket != null) serverSocket.close();
+            appendMessage("Connection closed.");
+        } catch (IOException e) {
+            appendMessage("Error closing connection.");
+        }
 
-    private void appendMessage(String msg) {}
+    }
+
+    private void appendMessage(String msg) {
+        Platform.runLater(() -> messageArea.appendText(msg + "\n"));
+
+    }
     }
