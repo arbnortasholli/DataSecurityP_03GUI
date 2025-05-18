@@ -94,7 +94,17 @@ public class Server {
         });
     }
 
-    private void listenToClient() {}
+    private void listenToClient() {
+        try {
+            String msg;
+            while ((msg = input.readUTF()) != null) {
+                String finalMsg = msg;
+                Platform.runLater(() -> appendMessage("Client: " + finalMsg));
+            }
+        } catch (IOException e) {
+            appendMessage("Client disconnected or error occurred.");
+        }
+    }
 
     @FXML
     private void onSend(ActionEvent event) {
